@@ -81,12 +81,13 @@ services:
           type: web
           property: host
 
+  - type: redis
+    name: payout-redis
+    plan: free
+    ipAllowList: []
+
 databases:
   - name: payout-db
     databaseName: payouts_db
     user: payouts_user
-    plan: free
-
-  - name: payout-redis
-    type: redis
     plan: free
