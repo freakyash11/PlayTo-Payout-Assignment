@@ -107,7 +107,3 @@ databases:
     databaseName: payouts_db
     user: payouts_user
     plan: free
-
-  - name: payout-redis
-    type: redis
-    plan: free
