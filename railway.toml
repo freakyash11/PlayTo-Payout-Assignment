@@ -1,0 +1,7 @@
+[build]
+builder = "dockerfile"
+
+[deploy]
+startCommand = "bash /app/bin/start.sh"
+healthcheckPath = "/api/v1/merchants/list/"
+restartPolicyType = "on_failure"
