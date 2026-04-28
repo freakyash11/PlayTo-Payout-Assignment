@@ -1,0 +1,113 @@
+services:
+  # ── Django Backend ──────────────────────────────────────────────────
+  - type: web
+    name: payout-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: payout-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: payout-redis
+          type: redis
+          property: connectionString
+      - key: CELERY_BROKER_URL
+        fromService:
+          name: payout-redis
+          type: redis
+          property: connectionString
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com,localhost"
+      - key: CORS_ALLOWED_ORIGINS
+        value: "https://payout-frontend.onrender.com,http://localhost:5173"
+
+  # ── Celery Worker ───────────────────────────────────────────────────
+  - type: worker
+    name: payout-celery-worker
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    startCommand: celery -A config worker -l info
+    envVars:
+      - key: SECRET_KEY
+        fromService:
+          name: payout-backend
+          type: web
+          envVarKey: SECRET_KEY
+      - key: DATABASE_URL
+        fromDatabase:
+          name: payout-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: payout-redis
+          type: redis
+          property: connectionString
+      - key: CELERY_BROKER_URL
+        fromService:
+          name: payout-redis
+          type: redis
+          property: connectionString
+      - key: DEBUG
+        value: "False"
+
+  # ── Celery Beat ─────────────────────────────────────────────────────
+  - type: worker
+    name: payout-celery-beat
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    startCommand: celery -A config beat -l info
+    envVars:
+      - key: SECRET_KEY
+        fromService:
+          name: payout-backend
+          type: web
+          envVarKey: SECRET_KEY
+      - key: DATABASE_URL
+        fromDatabase:
+          name: payout-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: payout-redis
+          type: redis
+          property: connectionString
+      - key: CELERY_BROKER_URL
+        fromService:
+          name: payout-redis
+          type: redis
+          property: connectionString
+      - key: DEBUG
+        value: "False"
+
+  # ── React Frontend ──────────────────────────────────────────────────
+  - type: web
+    name: payout-frontend
+    runtime: docker
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          name: payout-backend
+          type: web
+          property: host
+
+databases:
+  - name: payout-db
+    databaseName: payouts_db
+    user: payouts_user
+    plan: free
+
+  - name: payout-redis
+    type: redis
+    plan: free

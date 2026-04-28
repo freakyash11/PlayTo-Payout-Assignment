@@ -1,7 +1,8 @@
 import axios from "axios";
 
-// Vite proxies /api → http://backend:8000, so no absolute URL is needed.
-const api = axios.create({ baseURL: "/api/v1" });
+// Use env var VITE_API_URL or fallback to localhost
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const api = axios.create({ baseURL: `${BASE_URL}/api/v1` });
 
 // Inject X-Merchant-Id on every request when a merchant is selected.
 // The interceptor reads from a module-level variable set by setMerchantId().

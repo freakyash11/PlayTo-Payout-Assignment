@@ -14,7 +14,7 @@ DEBUG = config("DEBUG", default=True, cast=bool)
 
 ALLOWED_HOSTS = config(
     "ALLOWED_HOSTS",
-    default="*",
+    default="localhost,127.0.0.1",
     cast=lambda v: [s.strip() for s in v.split(",")],
 )
 
@@ -39,6 +39,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",      # must be before CommonMiddleware
     "django.middleware.common.CommonMiddleware",
@@ -102,6 +103,8 @@ USE_TZ = True
 # Static files
 # ---------------------------------------------------------------------------
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -147,10 +150,11 @@ CELERY_BEAT_SCHEDULE = {
 }
 
 # ---------------------------------------------------------------------------
-# CORS (django-cors-headers)
-# ---------------------------------------------------------------------------
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",   # Vite dev server
+# CORS (django-cors-heaconfig(
+    "CORS_ALLOWED_ORIGINS",
+    default="http://localhost:5173,http://127.0.0.1:5173",
+    cast=lambda v: [s.strip() for s in v.split(",")],
+)   "http://localhost:5173",   # Vite dev server
     "http://127.0.0.1:5173",
 ]
 # Expose our custom request headers so the browser doesn't block them
